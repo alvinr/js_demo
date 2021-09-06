@@ -116,7 +116,7 @@ class App extends Component {
 
   handleIncrement = counter => {
     let total_tickets = this.state.total_tickets;
-    if ( total_tickets < 4 || counter.needs_tickets) {
+    if ( total_tickets < 4 || !counter.needs_tickets) {
       const counters = [...this.state.counters];
       const index = counter.id-1;
       counters[index] = { ...counters[index] };
