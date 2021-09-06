@@ -5,10 +5,8 @@ import Blocks from "./components/blocks";
 import { v4 as uuidv4 } from 'uuid';
 import { GraphQLClient, gql } from 'graphql-request'
 
-const endpoint = "https://7f03ccf1-3187-4deb-a4ca-ee6b74121efe-us-east-1.apps.astra.datastax.com/api/graphql/js_demo";
-const client = new GraphQLClient(endpoint, { headers: {
-    "x-cassandra-token": "AstraCS:rYeZByozLHiibNzBnSrjDGbs:a083793b1c9b2a2365abdf0b377fbe1b98835b20dee2f42957a1494f572c05d2"}
-});
+const endpoint = process.env.REACT_APP_ASTRA_ENDPOINT;
+const client = new GraphQLClient(endpoint, { headers: { "x-cassandra-token": process.env.REACT_APP_ASTRA_TOKEN }});
 
 const UPDATE_CART = gql`
   mutation UpdateCart ($id: Uuid!, $upsert: Boolean!, $bag: [EntryStringKeyIntValueInput!]) {
