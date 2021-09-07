@@ -6,6 +6,7 @@ class Counters extends Component {
     const {
       onIncrement,
       onDecrement,
+// eslint-disable-next-line
       onReserve,
       counters,
       total_tickets

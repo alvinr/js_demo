@@ -5,6 +5,7 @@ class NavBar extends Component {
     const {
       ticketTotal,
       reservedTotal,
+// eslint-disable-next-line      
       onCheckOut
     } = this.props;
     return (

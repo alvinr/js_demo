@@ -3,9 +3,13 @@ import React, { Component } from "react";
 class Seat extends Component {
   render() {
     const {
+// eslint-disable-next-line      
         onSeatClick,
+// eslint-disable-next-line
         row,
+// eslint-disable-next-line
         seat,
+// eslint-disable-next-line
         state
       } = this.props;
     return (

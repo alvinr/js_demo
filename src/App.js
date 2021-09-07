@@ -7,7 +7,7 @@ import { GraphQLClient, gql } from 'graphql-request'
 
 const endpoint = process.env.REACT_APP_ASTRA_ENDPOINT;
 const client = new GraphQLClient(endpoint, { headers: { "x-cassandra-token": process.env.REACT_APP_ASTRA_TOKEN }});
-console.log(process.env.REACT_APP_ASTRA_ENDPOINT, process.env.REACT_APP_ASTRA_TOKEN);
+
 const UPDATE_CART = gql`
   mutation UpdateCart ($id: Uuid!, $upsert: Boolean!, $bag: [EntryStringKeyIntValueInput!]) {
       updatecarts(
@@ -21,7 +21,7 @@ const UPDATE_CART = gql`
       }
   }`;
 
-/* BUG: The variable/param needs to be 'crt_id', with 'cart' you get the following error
+/* BUG: The variable/param needs to be 'cart_id', with 'cart' you get the following error. Fuck knows if I know why...
    Uncaught (in promise) Error: Variable 'cart' has coerced Null value for NonNull type 'Uuid!': {"response":{"errors":[{"message":"Variable 'cart' has coerced Null value for NonNull type 'Uuid!'","locations":[{"line":2,"column":89}],"extensions":{"classification":"ValidationError"}}],"status":200,"headers":{"map":{"content-length":"177","content-type":"application/json","date":"Sat, 04 Sep 2021 20:52:11 GMT"}}},"request":{"query":"\n  mutation InsertHold ($event: String!, $block: String!, $row: String!, $seat: String!, $cart: Uuid!) {\n    insertseat_holds(\n      value: {\n          event: $event,\n          block: $block,\n          row: $row,\n          seat: $seat,\n          cart_id: $cart\n      },\n      options: { ttl: 60 }\n    ) {\n      applied\n    }\n  }","variables":{"event":"567","block":"A","row":"23","seat":0,"cart_id":"f754e582-72a6-4d52-9f34-b967b6726c25"}}}
     at index.js:491
     at step (index.js:179)
