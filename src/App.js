@@ -7,7 +7,7 @@ import { GraphQLClient, gql } from 'graphql-request'
 
 const endpoint = process.env.REACT_APP_ASTRA_ENDPOINT;
 const client = new GraphQLClient(endpoint, { headers: { "x-cassandra-token": process.env.REACT_APP_ASTRA_TOKEN }});
-
+console.log(process.env.REACT_APP_ASTRA_ENDPOINT, process.env.REACT_APP_ASTRA_TOKEN);
 const UPDATE_CART = gql`
   mutation UpdateCart ($id: Uuid!, $upsert: Boolean!, $bag: [EntryStringKeyIntValueInput!]) {
       updatecarts(

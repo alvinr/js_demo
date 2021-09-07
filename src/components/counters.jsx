@@ -8,8 +8,7 @@ class Counters extends Component {
       onDecrement,
       onReserve,
       counters,
-      total_tickets,
-      total_reserved
+      total_tickets
     } = this.props;
     return (
       <div>

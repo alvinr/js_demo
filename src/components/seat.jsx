@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { isComputedPropertyName } from "typescript";
 
 class Seat extends Component {
   render() {
@@ -26,11 +25,13 @@ class Seat extends Component {
     let classes = "badge m-2 badge-";
     switch (state) {
       case "Reserved":
-        return classes += "warning";
+        return classes += "primary";
       case "Taken":
         return classes += "error";
       case "Available":
-        return classes += "primary";
+        return classes += "warning";
+      default:
+        return "";
     }
   }
 
@@ -42,7 +43,9 @@ class Seat extends Component {
         return("fa fa-times-circle");
       case "Available":
         return("fas fa-check-circle");
-    }
+      default:
+        return "";
+      }
   }
 }
 
