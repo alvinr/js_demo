@@ -17,7 +17,7 @@ class Seat extends Component {
             <button
                 className="btn btn-secondary"
                 onClick={() => {this.props.onSeatClick(this.props.row, this.props.seat)}}
-                disabled={this.props.state === "Taken" ? "disabled" : ""}
+                disabled={((this.props.state === "Taken")) ? "disabled" : ""}
             >
                 <i className={this.getIcon(this.props.state)} />
             </button>

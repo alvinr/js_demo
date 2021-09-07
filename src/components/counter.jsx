@@ -14,8 +14,8 @@ class Counter extends Component {
             <button
               className="btn btn-secondary"
               onClick={() => this.props.onIncrement(this.props.counter)}
-              disabled={ ((this.props.counter.name === "Infant In Arms" && this.props.counter.value < this.props.total_tickets && this.props.total_tickets > 0) || (this.props.counter.name !== "Infant In Arms" && this.props.total_tickets < 4)) ? "" : "disabled" }
-                // (this.props.total_reserved >= this.props.total_tickets && this.props.total_tickets != 0) ? "disabled" : ""
+              // disabled={ ((this.props.counter.name === "Infant In Arms" && this.props.counter.value < this.props.total_tickets && this.props.total_tickets > 0) || (this.props.counter.name !== "Infant In Arms" && this.props.total_tickets < 4)) ? "" : "disabled" }
+              disabled={ ((this.props.counter.needs_ticket === false && this.props.counter.value < this.props.total_tickets && this.props.total_tickets > 0) || (this.props.counter.needs_ticket !== false && this.props.total_tickets < 4)) ? "" : "disabled" }
             >
               <i className="fa fa-plus-circle" />
             </button>
@@ -27,7 +27,7 @@ class Counter extends Component {
               <i className="fa fa-minus-circle" />
             </button>
           </div>
-          <div className="col-md-0">
+          <div className="col-md-1">
             <span style={{ fontSize: 24 }} className={this.getBadgeClasses()}>
               {this.props.counter.name}
             </span>

@@ -138,10 +138,14 @@ class App extends Component {
   handleDecrement = counter => {
     let total_tickets = this.state.total_tickets;
     const counters = [...this.state.counters];
-    const index = counters.indexOf(counter);
+    const index = counter.id-1;
     counters[index] = { ...counters[index] };
+    const infant_in_arms = counters.findIndex(counter => counter.name === "Infant In Arms");
     if ( counters[index].needs_ticket ) {
       total_tickets--;
+      if ( counters[infant_in_arms].value > total_tickets ) {
+        counters[infant_in_arms].value--;
+      }
     }
     counters[index].value--;
   
