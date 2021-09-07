@@ -15,7 +15,7 @@ class Counter extends Component {
               className="btn btn-secondary"
               onClick={() => this.props.onIncrement(this.props.counter)}
               // disabled={ ((this.props.counter.name === "Infant In Arms" && this.props.counter.value < this.props.total_tickets && this.props.total_tickets > 0) || (this.props.counter.name !== "Infant In Arms" && this.props.total_tickets < 4)) ? "" : "disabled" }
-              disabled={ ((this.props.counter.needs_ticket === false && this.props.counter.value < this.props.total_tickets && this.props.total_tickets > 0) || (this.props.counter.needs_ticket !== false && this.props.total_tickets < 4)) ? "" : "disabled" }
+              disabled={ ((this.props.counter.needs_ticket === false && this.props.counter.value < this.props.total_tickets && this.props.total_tickets > 0) || (this.props.counter.needs_ticket !== false && this.props.total_tickets < 4)) ? false : true }
             >
               <i className="fa fa-plus-circle" />
             </button>

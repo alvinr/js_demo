@@ -3,21 +3,24 @@ import React, { Component } from "react";
 class Seat extends Component {
   render() {
     const {
-// eslint-disable-next-line      
+// eslint-disable-next-line
         onSeatClick,
 // eslint-disable-next-line
         row,
 // eslint-disable-next-line
         seat,
 // eslint-disable-next-line
-        state
-      } = this.props;
+        state,
+// eslint-disable-next-line
+      onSeatVisible
+} = this.props;
     return (
         <span style={{ fontSize: 24 }} className={this.getBadgeClasses(this.props.state)}>
             <button
                 className="btn btn-secondary"
                 onClick={() => {this.props.onSeatClick(this.props.row, this.props.seat)}}
-                disabled={((this.props.state === "Taken")) ? "disabled" : ""}
+                // disabled={((this.props.state === "Taken")) ? "disabled" : ""}
+                disabled={this.props.onSeatVisible(this.props.state)}
             >
                 <i className={this.getIcon(this.props.state)} />
             </button>

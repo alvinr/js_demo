@@ -7,7 +7,8 @@ class BlockRow extends Component {
     const {
       row,
       state,
-      onSeatClick
+      onSeatClick,
+      onSeatVisible
     } = this.props;
     return (
       <div>
@@ -21,6 +22,7 @@ class BlockRow extends Component {
               seat={index}
               row={row}
               onSeatClick={onSeatClick}
+              onSeatVisible={onSeatVisible}
               state={seat_state}
             />
           ))}

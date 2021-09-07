@@ -5,6 +5,7 @@ class Blocks extends Component {
   render() {
     const {
       onSeatClick,
+      onSeatVisible,
       blocks
     } = this.props;
     return (
@@ -16,6 +17,7 @@ class Blocks extends Component {
               row={row}
               state={row.state}
               onSeatClick={onSeatClick}
+              onSeatVisible={onSeatVisible}
             />
           ))}
         </div>

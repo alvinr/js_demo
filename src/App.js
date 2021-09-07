@@ -148,7 +148,7 @@ class App extends Component {
       }
     }
     counters[index].value--;
-  
+
     this.updateCart(counters)
       .then(this.setState({ counters, total_tickets }));
   };
@@ -170,7 +170,7 @@ class App extends Component {
         }
         this.setState({ seat_blocks });
       })
-      .catch((err) => {console.log(err)});  
+      .catch((err) => {console.log(err)});
   };
 
   modifySeatHold = (event, block, row, seat, state, cart) => {
@@ -189,7 +189,7 @@ class App extends Component {
           })
           .catch((err) => reject(err));
         })
-      } 
+      }
     else {
       return new Promise((resolve, reject) => {
         client.request(DEL_HOLD, vars)
@@ -226,9 +226,24 @@ class App extends Component {
     }
   };
 
+  handleSeatVisible = (state) => {
+    if ( state === "Taken" ) {
+      return true;
+    }
+    else if ( state === "Reserved" ) {
+      return false;
+    }
+    else if ( this.state.total_reserved === this.state.total_tickets ) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  };
+
   handleCheckOut = () => {
     console.log("You brought ticket");
-  }
+  };
 
   render() {
     return (
@@ -258,6 +273,7 @@ class App extends Component {
           <Blocks
             blocks={this.state.seat_blocks}
             onSeatClick={this.handleSeatClick}
+            onSeatVisible={this.handleSeatVisible}
           />
         </main>
       </div>

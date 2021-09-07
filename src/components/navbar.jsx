@@ -5,7 +5,7 @@ class NavBar extends Component {
     const {
       ticketTotal,
       reservedTotal,
-// eslint-disable-next-line      
+// eslint-disable-next-line
       onCheckOut
     } = this.props;
     return (
@@ -19,7 +19,7 @@ class NavBar extends Component {
           <button
             className="btn btn-success m-2"
             onClick={() => this.props.onCheckOut()}
-            disabled={(ticketTotal > 0 && reservedTotal ===  ticketTotal) ? "" : "disabled"}
+            disabled={(ticketTotal > 0 && reservedTotal ===  ticketTotal) ? false : true}
           >
             <i className="fa fa-credit-card" />
           </button>
