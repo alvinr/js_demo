@@ -82,7 +82,7 @@ class App extends Component {
     total_reserved: 0,
     cart_id: "",
     seat_blocks: [],
-    event: "567"
+    event: { id: "567", limit: 4 }
   };
 
   updateCart = (counters) => {
@@ -116,7 +116,7 @@ class App extends Component {
 
   handleIncrement = counter => {
     let total_tickets = this.state.total_tickets;
-    if ( total_tickets < 4 || !counter.needs_tickets) {
+    if ( total_tickets < this.state.event.limit || !counter.needs_tickets) {
       const counters = [...this.state.counters];
       const index = counter.id-1;
       counters[index] = { ...counters[index] };
@@ -163,7 +163,7 @@ class App extends Component {
   };
 
   handleGetSeatMap = () => {
-    this.getSeatBlocks(this.state.event)
+    this.getSeatBlocks(this.state.event.id)
       .then((seat_blocks) => {
         for (let i=0; i < seat_blocks.length; i++) {
           seat_blocks[i]['state'] = seat_blocks[i]['state'].map(state => (state === true ? "Available" : "Taken"))
@@ -176,6 +176,7 @@ class App extends Component {
   modifySeatHold = (event, block, row, seat, state, cart) => {
     let vars = { event: event, block: block, row: row, seat: seat, cart_id: cart};
     if (state === "Reserved" ) {
+      console.log('CREATE a latch for ' + block + ':' + row + ':' + seat + ' ' + cart);
       return new Promise((resolve, reject) => {
         client.request(ADD_HOLD, vars)
           .then((res) => {
@@ -191,6 +192,7 @@ class App extends Component {
         })
       }
     else {
+      console.log('REMOVE a latch for ' + block + ':' + row + ':' + seat + ' ' + cart);
       return new Promise((resolve, reject) => {
         client.request(DEL_HOLD, vars)
           .then((res) => {
@@ -212,8 +214,7 @@ class App extends Component {
       const seat_blocks = [...this.state.seat_blocks];
       const index = seat_blocks.findIndex(block => block.block === row.block && block.row === row.row);
       seat_blocks[index]['state'][seat] = (row.state[seat] === "Available" ? "Reserved" : "Available");
-      console.log('Create a latch for ' + row.block + ':' + row.row + ':' + seat + ' ' + this.state.cart_id)
-      this.modifySeatHold(this.state.event, row.block, row.row, seat, seat_blocks[index]['state'][seat], this.state.cart_id)
+      this.modifySeatHold(this.state.event.id, row.block, row.row, seat, seat_blocks[index]['state'][seat], this.state.cart_id)
         .then((res) => {
           if (!res) {
             seat_blocks[index]['state'][seat] = "Taken";
