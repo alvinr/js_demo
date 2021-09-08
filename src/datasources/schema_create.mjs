@@ -6,6 +6,8 @@ const schema_client = new GraphQLClient(schema_endpoint, { headers: { "x-cassand
 const endpoint = process.env.REACT_APP_ASTRA_ENDPOINT;
 const client = new GraphQLClient(endpoint, { headers: { "x-cassandra-token": process.env.REACT_APP_ASTRA_TOKEN }});
 
+const KEYSPACE = "js_demo";
+
 /* GraphQL versions of these CQL commands */
 
 /*
@@ -39,6 +41,7 @@ gql`mutation createTableIfNotExists ($keyspaceName: String!) {
    );
 */
 
+// NOTE: Had to add cluster keys (which CQL defines by default) to avoid the "use ALLOW FILTERING" error
 const CREATE_SEAT_MAPS =
   gql`mutation createTableIfNotExists ($keyspaceName: String!) {
         seat_maps: createTable(
@@ -46,9 +49,11 @@ const CREATE_SEAT_MAPS =
           tableName: "seat_maps",
           partitionKeys: [
             { name: "event_id", type: {basic: TEXT} }
-            { name: "block", type: {basic: TEXT} }
-            { name: "row", type: {basic: TEXT} }
-          ]
+          ],
+          clusteringKeys: [
+            { name: "block", type: { basic: TEXT} }
+            { name: "row", type: { basic: TEXT} }
+          ],
         values: [
             { name: "state", type: {basic:LIST, info:{ subTypes: [ { basic: BOOLEAN } ] } } }
         ]
@@ -108,7 +113,7 @@ const ddl_cmds = [
 const executeDDLCmds = (request) => {
    console.log(request.name);
     return new Promise((resolve, reject) => {
-      const vars = { keyspaceName: "js_demo2" };
+      const vars = { keyspaceName: KEYSPACE };
       schema_client.request(request.cmd, vars)
         .then((res) => {return resolve(res)})
         .catch((err) => {return reject(err)});
@@ -200,7 +205,7 @@ const INSERT_SEAT_HOLDS =
     }`;
 
 const seat_holds = [
-  { cart_id: '52eebef2-7050-48c3-b841-fd5c1e5149c1', event: '567', block: 'A', row: '23', seat: '0' }
+  { cart_id: '52eebef2-7050-48c3-b841-fd5c1e5149c1', event: '567', block: 'B', row: '10', seat: '0' }
 ]
 
 const dml_cmds = [ {name: "insert events", cmd: INSERT_EVENTS, data: events},
@@ -217,39 +222,3 @@ const executeDMLCmd = (cmd, data) => {
 };
 
 dml_cmds.forEach((request) => { request.data.forEach((data) => executeDMLCmd(request.cmd, data)) } );
-
-/*
-
-  CREATE TABLE events ( id text, venue text, event text, event_start date, event_end date, location text, ticket_limit int,
-    PRIMARY KEY (venue, event, event_start)
-   );
-
-   insert into events (id, venue, event, event_start, event_end, location, ticket_limit) values ('567', 'The Dell', 'vs. Man Utd.', todate(now()), todate(now()), 'Southampton, England', 4);
-
-   CREATE TABLE seat_maps (event_id text, block text, row text, state list<boolean>,
-    PRIMARY KEY (event_id, block, row)
-   );
-
-   insert into seat_maps ( event_id, block, row, state) values ('567', 'A', '23', [true, true, true, true, true]);
-   insert into seat_maps ( event_id, block, row, state) values ('567', 'A', '24', [false, true, false, true, true]);
-   insert into seat_maps ( event_id, block, row, state) values ('567', 'A', '25', [true, false, true, false, true]);
-   insert into seat_maps ( event_id, block, row, state) values ('567', 'A', '26', [true, true, true, true, false]);
-
-   insert into seat_maps ( event_id, block, row, state) values ('567', 'B', '10', [true, true, true, true, false]);
-
-   insert into seat_maps ( event_id, block, row, state) values ('789', 'Z', '99', [true, true, true, true, true]);
-
-   CREATE TABLE carts (id uuid, bag map<text, int>,
-    PRIMARY KEY (id)
-   );
-
-   insert into carts (id, bag) values (now(), {'Adults':1, 'Children':2, 'Infants in Arms':0, 'Disabled':0});
-
-   CREATE TABLE seat_holds (cart_id uuid, event text, block text, row text, seat text,
-    PRIMARY KEY (event, block, row, seat)
-   );
-
-   insert into seat_holds (cart_id, event, block, row, seat) values (52eebef2-7050-48c3-b841-fd5c1e5149c1, '567', 'A14', 'D', '14') using TTL 10;
-   insert into seat_holds (cart_id, event, block, row, seat) values (52eebef2-7050-48c3-b841-fd5c1e5149c1, '567', 'B', '10', '0');
-
-*/

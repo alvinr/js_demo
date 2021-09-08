@@ -243,7 +243,7 @@ class App extends Component {
   };
 
   handleCheckOut = () => {
-    console.log("You brought ticket");
+    console.log("You brought ticket(s)");
   };
 
   render() {
