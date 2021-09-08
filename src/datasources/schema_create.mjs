@@ -1,6 +1,8 @@
 import { execute } from 'graphql';
 import { GraphQLClient, gql } from 'graphql-request'
 
+/* Make sure these are defined as environment variable and pointing to the right endpoint with the right token/role tuple */
+
 const schema_endpoint = process.env.REACT_APP_ASTRA_SCHEMA_ENDPOINT;
 const schema_client = new GraphQLClient(schema_endpoint, { headers: { "x-cassandra-token": process.env.REACT_APP_ASTRA_SCHEMA_TOKEN }});
 
@@ -241,25 +243,27 @@ const executeDMLCmd = (cmd, data) => {
  })
 };
 
-const cmds = [ { name: "events",
-           ddl: {name: 'create events',   cmd: CREATE_EVENTS},
-           dml: {name: "insert events", cmd: INSERT_EVENTS, data: events}
-          },
-          { name: "seat_maps",
-            ddl: {name: 'create seat_maps', cmd: CREATE_SEAT_MAPS},
-            dml: {name: "insert seat_maps", cmd: INSERT_SEAT_MAPS, data: seat_maps}
-          },
-          { name: "carts",
-            ddl: {name: 'create carts', cmd: CREATE_CARTS}
-          },
-          { name: "seat_holds",
-            ddl: {name: 'create seat_holds', cmd: CREATE_SEAT_HOLDS},
-            dml: {name: "insert seat_holds", cmd: INSERT_SEAT_HOLDS, data: seat_holds}
-          }
-       ]
+const cmds = [  { name: "events",
+                  ddl: {name: 'create events',   cmd: CREATE_EVENTS},
+                  dml: {name: "insert events", cmd: INSERT_EVENTS, data: events}
+                },
+                { name: "seat_maps",
+                  ddl: {name: 'create seat_maps', cmd: CREATE_SEAT_MAPS},
+                  dml: {name: "insert seat_maps", cmd: INSERT_SEAT_MAPS, data: seat_maps}
+                },
+                { name: "carts",
+                  ddl: {name: 'create carts', cmd: CREATE_CARTS}
+                },
+                { name: "seat_holds",
+                  ddl: {name: 'create seat_holds', cmd: CREATE_SEAT_HOLDS},
+                  dml: {name: "insert seat_holds", cmd: INSERT_SEAT_HOLDS, data: seat_holds}
+                }
+            ]
 
-//ddl_cmds.forEach(executeDDLCmd);
-//dml_cmds.forEach((request) => { request.data.forEach((data) => executeDMLCmd(request.cmd, data)) } );
+
+// If you wanted to run the commands separely, rather than chained invoke
+//   ddl_cmds.forEach(executeDDLCmd);
+//   dml_cmds.forEach((request) => { request.data.forEach((data) => executeDMLCmd(request.cmd, data)) } );
 
 cmds.forEach((request) => {
   if ( "ddl" in request) {
