@@ -1,3 +1,4 @@
+import { execute } from 'graphql';
 import { GraphQLClient, gql } from 'graphql-request'
 
 const schema_endpoint = process.env.REACT_APP_ASTRA_SCHEMA_ENDPOINT;
@@ -10,12 +11,16 @@ const KEYSPACE = "js_demo";
 
 /* GraphQL versions of these CQL commands */
 
+// DDL COMMANDS
+
 /*
   CREATE TABLE events ( id text, venue text, event text, event_start date, event_end date, location text, ticket_limit int,
     PRIMARY KEY (venue, event, event_start)
    );
 */
 
+// NOTE: Had to add cluster keys (which CQL defines by default) to avoid the "use ALLOW FILTERING" error
+// NOTE: The clustering keys get appended to the list of the Primary Key, again different from CQL
 const CREATE_EVENTS =
 gql`mutation createTableIfNotExists ($keyspaceName: String!) {
       events: createTable(
@@ -23,15 +28,17 @@ gql`mutation createTableIfNotExists ($keyspaceName: String!) {
         tableName: "events",
         partitionKeys: [
           { name: "venue", type: {basic: TEXT} }
-          { name: "event", type: {basic: TEXT} }
-          { name: "event_start", type: {basic: DATE} }
         ]
-      values: [
-        { name: "id", type: {basic: TEXT} }
-        { name: "event_end", type: {basic: DATE} }
-        { name: "location", type: {basic: TEXT} }
-        { name: "ticket_limit", type: {basic: INT} }
-      ]
+        clusteringKeys: [
+          { name: "event", type: { basic: TEXT} }
+          { name: "event_start", type: { basic: DATE} }
+        ],
+        values: [
+            { name: "id", type: {basic: TEXT} }
+            { name: "event_end", type: {basic: DATE} }
+            { name: "location", type: {basic: TEXT} }
+            { name: "ticket_limit", type: {basic: INT} }
+          ]
     )
   }`;
 
@@ -42,6 +49,7 @@ gql`mutation createTableIfNotExists ($keyspaceName: String!) {
 */
 
 // NOTE: Had to add cluster keys (which CQL defines by default) to avoid the "use ALLOW FILTERING" error
+// NOTE: The clustering keys get appended to the list of the Primary Key, again different from CQL
 const CREATE_SEAT_MAPS =
   gql`mutation createTableIfNotExists ($keyspaceName: String!) {
         seat_maps: createTable(
@@ -86,6 +94,8 @@ const CREATE_CARTS =
    );
 */
 
+// NOTE: Had to add cluster keys (which CQL defines by default) to avoid the "use ALLOW FILTERING" error
+// NOTE: The clustering keys get appended to the list of the Primary Key, again different from CQL
 const CREATE_SEAT_HOLDS =
   gql`mutation createTableIfNotExists ($keyspaceName: String!) {
         seat_holds: createTable(
@@ -93,34 +103,20 @@ const CREATE_SEAT_HOLDS =
           tableName: "seat_holds",
           partitionKeys: [
             { name: "event", type: {basic: TEXT} }
-            { name: "block", type: {basic: TEXT} }
-            { name: "row", type: {basic: TEXT} }
-            { name: "seat", type: {basic: TEXT} }
           ]
+          clusteringKeys: [
+            { name: "block", type: { basic: TEXT} }
+            { name: "row", type: { basic: TEXT} }
+            { name: "seat", type: {basic: TEXT} }
+          ],
         values: [
             { name: "cart_id", type:{basic: UUID } }
         ]
       )
   }`;
 
-const ddl_cmds = [
-  {name: 'events',      cmd: CREATE_EVENTS},
-  {name: 'seat_maps',   cmd: CREATE_SEAT_MAPS},
-  {name: 'carts',       cmd: CREATE_CARTS},
-  {name: 'seat_holds',  cmd: CREATE_SEAT_HOLDS}
-];
 
-const executeDDLCmds = (request) => {
-   console.log(request.name);
-    return new Promise((resolve, reject) => {
-      const vars = { keyspaceName: KEYSPACE };
-      schema_client.request(request.cmd, vars)
-        .then((res) => {return resolve(res)})
-        .catch((err) => {return reject(err)});
-  })
-};
-
-//ddl_cmds.forEach(executeDDLCmds);
+// DML COMMANDS
 
 /*
    insert into events (id, venue, event, event_start, event_end, location, ticket_limit) values ('567', 'The Dell', 'vs. Man Utd.', todate(now()), todate(now()), 'Southampton, England', 4);
@@ -208,6 +204,27 @@ const seat_holds = [
   { cart_id: '52eebef2-7050-48c3-b841-fd5c1e5149c1', event: '567', block: 'B', row: '10', seat: '0' }
 ]
 
+// PROCESS THE DDL AND DML COMMANDS
+
+const ddl_cmds = [
+  {name: 'events',      cmd: CREATE_EVENTS},
+  {name: 'seat_maps',   cmd: CREATE_SEAT_MAPS},
+  {name: 'carts',       cmd: CREATE_CARTS},
+  {name: 'seat_holds',  cmd: CREATE_SEAT_HOLDS}
+];
+
+const executeDDLCmd = (request) => {
+    return new Promise((resolve, reject) => {
+      const vars = { keyspaceName: KEYSPACE };
+      schema_client.request(request.cmd, vars)
+        .then((res) => {
+          console.log(request.name);
+          return resolve(res)
+        })
+        .catch((err) => {return reject(err)});
+  })
+};
+
 const dml_cmds = [ {name: "insert events", cmd: INSERT_EVENTS, data: events},
                    {name: "insert seat_maps", cmd: INSERT_SEAT_MAPS, data: seat_maps},
                    {name: "insert seat_holds", cmd: INSERT_SEAT_HOLDS, data: seat_holds}
@@ -216,9 +233,46 @@ const dml_cmds = [ {name: "insert events", cmd: INSERT_EVENTS, data: events},
 const executeDMLCmd = (cmd, data) => {
   return new Promise((resolve, reject) => {
      client.request(cmd, data)
-       .then((res) => {console.log(res);return resolve(res)})
+       .then((res) => {
+         console.log(res);
+         return resolve(res);
+       })
        .catch((err) => {return reject(err)});
  })
 };
 
-dml_cmds.forEach((request) => { request.data.forEach((data) => executeDMLCmd(request.cmd, data)) } );
+const cmds = [ { name: "events",
+           ddl: {name: 'create events',   cmd: CREATE_EVENTS},
+           dml: {name: "insert events", cmd: INSERT_EVENTS, data: events}
+          },
+          { name: "seat_maps",
+            ddl: {name: 'create seat_maps', cmd: CREATE_SEAT_MAPS},
+            dml: {name: "insert seat_maps", cmd: INSERT_SEAT_MAPS, data: seat_maps}
+          },
+          { name: "carts",
+            ddl: {name: 'create carts', cmd: CREATE_CARTS}
+          },
+          { name: "seat_holds",
+            ddl: {name: 'create seat_holds', cmd: CREATE_SEAT_HOLDS},
+            dml: {name: "insert seat_holds", cmd: INSERT_SEAT_HOLDS, data: seat_holds}
+          }
+       ]
+
+//ddl_cmds.forEach(executeDDLCmd);
+//dml_cmds.forEach((request) => { request.data.forEach((data) => executeDMLCmd(request.cmd, data)) } );
+
+cmds.forEach((request) => {
+  if ( "ddl" in request) {
+    executeDDLCmd(request.ddl)
+      .then(() => {
+        if ( "dml" in request) {
+          request.dml.data.forEach((data) => executeDMLCmd(request.dml.cmd, data));
+        }
+        return true;
+      })
+      .catch((err) => {
+        console.log(err);
+        return false;
+      })
+  }
+})
