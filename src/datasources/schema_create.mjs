@@ -140,7 +140,7 @@ const INSERT_EVENTS =
         ) {
         applied
         }
-    }`;
+  }`;
 
 const events = [
   { id: '567', venue: 'The Dell', event: 'vs. Man Utd.', event_start: new Date().toISOString().split('T')[0], event_end: new Date().toISOString().split('T')[0], location: 'Southampton, England', ticket_limit: 4}
@@ -170,7 +170,7 @@ const INSERT_SEAT_MAPS =
         ) {
         applied
         }
-    }`;
+  }`;
 
 const seat_maps = [
   { event_id: '567', block: 'A', row: '23', state: [true, true, true, true, true] },
@@ -261,22 +261,56 @@ const cmds = [  { name: "events",
             ]
 
 
-// If you wanted to run the commands separely, rather than chained invoke
-//   ddl_cmds.forEach(executeDDLCmd);
-//   dml_cmds.forEach((request) => { request.data.forEach((data) => executeDMLCmd(request.cmd, data)) } );
+const buildSchema = (cmds) => {
+  cmds.forEach((request) => {
+    if ( "ddl" in request) {
+      executeDDLCmd(request.ddl)
+        .then(() => {
+          if ( "dml" in request) {
+            request.dml.data.forEach((data) => executeDMLCmd(request.dml.cmd, data));
+          }
+          return true;
+        })
+        .catch((err) => {
+          console.log(err);
+          return false;
+        })
+    }
+  })
+}
 
-cmds.forEach((request) => {
-  if ( "ddl" in request) {
-    executeDDLCmd(request.ddl)
-      .then(() => {
-        if ( "dml" in request) {
-          request.dml.data.forEach((data) => executeDMLCmd(request.dml.cmd, data));
-        }
-        return true;
-      })
-      .catch((err) => {
-        console.log(err);
-        return false;
-      })
-  }
-})
+//buildSchema(cmds);
+
+// Re-write to use async and await
+const ddl_promises = [];
+const dml_promises = [];
+
+const executeDDLCmdAsync = async (cmd) => {
+  const vars = { keyspaceName: KEYSPACE };
+  return schema_client.request(cmd, vars)
+};
+
+const executeDMLCmdAsync = async (cmd, data) => {
+  return client.request(cmd, data);
+};
+
+const buildSchemaAsync = async (cmds) => {
+  cmds.forEach( (request) => {
+    if ( "ddl" in request) {
+      console.log(request.ddl.name);
+      ddl_promises.push(executeDDLCmdAsync(request.ddl.cmd));
+    }
+  });
+  let foo = await Promise.all(ddl_promises);
+  cmds.forEach( (request) => {
+    if ( "dml" in request) {
+      request.dml.data.forEach((data) => {
+        console.log(request.dml.name);
+        dml_promises.push(executeDMLCmdAsync(request.dml.cmd, data));
+      });
+    }
+  });
+  let bar = await Promise.all(dml_promises);
+};
+
+buildSchemaAsync(cmds);

@@ -1,20 +1,10 @@
+drop table carts; drop table seat_holds; drop table events; drop table seat_maps;
+
 CREATE TABLE events ( id text, venue text, event text, event_start date, event_end date, location text, ticket_limit int,
  PRIMARY KEY (venue, event, event_start)
 );
 
 insert into events (id, venue, event, event_start, event_end, location, ticket_limit) values ('123', 'The Dell', 'vs. Man Utd.', todate(now()), todate(now()), 'Southampton, England', 4);
-
-CREATE TABLE seat_maps (event_id text, block text, row text, seat text, state boolean,
- PRIMARY KEY (event_id, block, row, seat)
-);
-
-insert into seat_maps ( event_id, block, row, seat, available) values ('567', 'A', '23', '1', true);
-insert into seat_maps ( event_id, block, row, seat, available) values ('567', 'A', '23', '2', true);
-insert into seat_maps ( event_id, block, row, seat, available) values ('567', 'A', '23', '3', true);
-insert into seat_maps ( event_id, block, row, seat, available) values ('567', 'A', '23', '4', true);
-insert into seat_maps ( event_id, block, row, seat, available) values ('567', 'A', '23', '5', true);
-insert into seat_maps ( event_id, block, row, seat, available) values ('567', 'A', '23', '6', true);
-insert into seat_maps ( event_id, block, row, seat, available) values ('567', 'A', '23', '6', true);
 
 CREATE TABLE seat_maps (event_id text, block text, row text, state list<boolean>,
  PRIMARY KEY (event_id, block, row)

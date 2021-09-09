@@ -182,7 +182,7 @@ class App extends Component {
   modifySeatHold = (event, block, row, seat, state, cart) => {
     let vars = { event: event, block: block, row: row, seat: seat, cart_id: cart};
     if (state === "Reserved" ) {
-      console.log('CREATE a latch for ' + block + ':' + row + ':' + seat + ' ' + cart);
+      console.log(`CREATE a latch for ${block}:${row}:${seat} ${cart}`);
       return new Promise((resolve, reject) => {
         client.request(ADD_HOLD, vars)
           .then((res) => {
@@ -198,7 +198,7 @@ class App extends Component {
         })
       }
     else {
-      console.log('REMOVE a latch for ' + block + ':' + row + ':' + seat + ' ' + cart);
+      console.log(`REMOVE a latch for ${block}:${row}:${seat} ${cart}`);
       return new Promise((resolve, reject) => {
         client.request(DEL_HOLD, vars)
           .then((res) => {
