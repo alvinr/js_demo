@@ -313,4 +313,36 @@ const buildSchemaAsync = async (cmds) => {
   let bar = await Promise.all(dml_promises);
 };
 
-buildSchemaAsync(cmds);
+//buildSchemaAsync(cmds);
+
+// Re-write to use async and await - TAKE 2
+const buildTable = async (request) => {
+  const vars = { keyspaceName: KEYSPACE };
+  if ("ddl" in request) {
+    schema_client.request(request.ddl.cmd, vars)
+    .then( async () => {
+      if ( "dml" in request) {
+        const dml_promises = [];
+        request.dml.data.forEach((data) =>  {
+          console.log(request.dml.name);
+          dml_promises.push(client.request(request.dml.cmd, data));
+        });
+        return await Promise.all(dml_promises);
+      }
+    });
+  }
+  return true;
+};
+
+const buildSchemaAsync2 = async (cmds) => {
+  const ddl_promises = [];
+  cmds.forEach( (request) => {
+    if ( "ddl" in request) {
+      console.log(request.ddl.name);
+      ddl_promises.push(buildTable(request));
+    }
+  });
+  return await Promise.all(ddl_promises);
+};
+
+buildSchemaAsync2(cmds);
